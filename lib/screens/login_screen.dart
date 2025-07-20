@@ -21,53 +21,57 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isSigningIn = false;
 
-  Future<void> _signInWithGoogle() async {
-    if (Platform.isWindows) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Google Sign-In not supported on Windows')),
-      );
+Future<void> _signInWithGoogle() async {
+  if (Platform.isWindows) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Google Sign-In is not supported on Windows')),
+    );
+    return;
+  }
+
+  setState(() => _isSigningIn = true);
+
+  try {
+    final GoogleSignIn googleSignIn = GoogleSignIn(); // v6.x constructor
+
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      setState(() => _isSigningIn = false);
       return;
     }
 
-    setState(() => _isSigningIn = true);
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        setState(() => _isSigningIn = false);
-        return;
-      }
+    final googleAuth = await googleUser.authentication;
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      final userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      final user = userCredential.user;
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    final user = userCredential.user;
 
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'email': user.email,
-          'displayName': user.displayName,
-          'photoURL': user.photoURL,
-          'lastSignIn': DateTime.now(),
-        }, SetOptions(merge: true));
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signed in successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
-    } finally {
-      setState(() => _isSigningIn = false);
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoURL': user.photoURL,
+        'lastSignIn': DateTime.now(),
+      }, SetOptions(merge: true));
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Signed in successfully!')),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login failed: $e')),
+    );
+  } finally {
+    setState(() => _isSigningIn = false);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
                         color: Colors.white54,
                       ),
                       onPressed: () =>
@@ -159,15 +161,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Sign In Button (email/password not implemented)
+                // Sign In Button
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Email login not implemented'),
-                        ),
+                        const SnackBar(content: Text('Email login not implemented')),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Center(
                   child: TextButton(
-                    onPressed: () {}, // TODO: Navigate to create account screen
+                    onPressed: () {}, // TODO: Register handler
                     child: const Text(
                       "Need an account? Create one",
                       style: TextStyle(
@@ -235,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 34),
 
-                // Bottom Logo
+                // Logo
                 Center(
                   child: Image.asset(
                     'assets/icons/logo.png',
