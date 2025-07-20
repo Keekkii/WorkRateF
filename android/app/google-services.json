@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "769425219894",
+    "project_id": "workrate-74f12",
+    "storage_bucket": "workrate-74f12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769425219894:android:27e98ecc6094be26441397",
+        "android_client_info": {
+          "package_name": "com.example.workrate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769425219894-ouj6acjk2ii2q05i4bs3q29o0kl5sruk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.workrate",
+            "certificate_hash": "35c63b22391d65cd3028dbefe8ab22744f82927c"
+          }
+        },
+        {
+          "client_id": "769425219894-3cspnq9ptbg5885bkeelmu9civid8416.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXD_QGIBRb2x9YOdspvTH2Y9XSBsVq28I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769425219894-3cspnq9ptbg5885bkeelmu9civid8416.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
