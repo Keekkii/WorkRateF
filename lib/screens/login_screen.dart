@@ -4,8 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'register_screen.dart';
+
 
 const Color kBackground = Color(0xFF121515);
+const Color primary = Color(0xFF1156AC);
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -171,7 +174,7 @@ Future<void> _signInWithGoogle() async {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -196,41 +199,60 @@ Future<void> _signInWithGoogle() async {
 
                 // Google Sign-In Button
                 SizedBox(
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _isSigningIn ? null : _signInWithGoogle,
-                    icon: SvgPicture.asset(
-                      'assets/icons/google-icon.svg',
-                      height: 24,
-                      width: 24,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: _isSigningIn ? null : _signInWithGoogle,
+                  icon: SvgPicture.asset(
+                    'assets/icons/google-icon.svg',
+                    height: 24,
+                    width: 24,
+                  ),
+                  label: const Text(
+                    "Sign in with Google",
+                    style: TextStyle(
+                      color: Colors.blue, 
+                      fontSize: 16,
                     ),
-                    label: const Text(
-                      "Sign in with Google",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white24),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
+              ),
+
                 const SizedBox(height: 22),
 
                 Center(
                   child: TextButton(
-                    onPressed: () {}, // TODO: Register handler
-                    child: const Text(
-                      "Need an account? Create one",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      );
+                    },
+                    child: const Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Need an account? ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: "Create one",
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
                   ),
                 ),
                 const SizedBox(height: 34),
