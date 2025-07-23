@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-const Color kBackground = Color(0xFF18191A);
 const Color primary = Color(0xFF1156AC);
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key); // Constructor required for routes
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackground,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar
+            // App Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 4.0),
               child: Row(
                 children: [
                   Text(
@@ -25,23 +25,26 @@ class HomePage extends StatelessWidget {
                       fontFamily: 'RobotoMono',
                       fontSize: 27,
                       letterSpacing: 2,
-                      color: Colors.white,
+                      color: primary,
                     ),
                   ),
                   Spacer(),
                   IconButton(
                     icon: Icon(Icons.add_circle_outline_rounded, color: primary, size: 32),
-                    onPressed: () {
-                      // TODO: Implement new post/job action
-                    },
+                    onPressed: () {},
                   ),
                 ],
               ),
             ),
-            // Divider (simulate underline in the app bar)
-            Divider(color: Colors.white24, thickness: 0.9, height: 0),
+            Divider(
+              color: Colors.black26,
+              thickness: 1,
+              height: 0,
+              indent: 10,
+              endIndent: 10,
+            ),
 
-            // Example Post Card
+            // Example Post/Profile Card
             Padding(
               padding: const EdgeInsets.all(14.0),
               child: Card(
@@ -54,7 +57,6 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Row
                       Row(
                         children: [
                           CircleAvatar(
@@ -132,37 +134,41 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
-            Spacer(),
-            // Bottom Navigation Bar
-            Container(
-              color: Colors.transparent,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _BottomIconButton(icon: Icons.home, label: "HOME", selected: true),
-                  _BottomIconButton(icon: Icons.add_box_rounded, label: "POST\nA JOB"),
-                  _BottomIconButton(icon: Icons.chat_bubble_outline_rounded, label: "", isBig: true),
-                  _BottomIconButton(icon: Icons.map, label: "MAP"),
-                  _BottomIconButton(icon: Icons.person_outline_rounded, label: "PROFILE"),
-                ],
-              ),
-            ),
+            // Remove Spacer() to avoid extra space below
           ],
         ),
       ),
+      // Bottom Navigation Bar anchored flush to bottom
+      bottomNavigationBar: Container(
+  color: Color(0xFFEEEEEE),
+  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+  child: SizedBox(
+    height: 80, // Lower this for a slimmer background; try 36 or 32 as needed
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _BottomSvgButton(svgPath: 'assets/icons/home.svg', label: "HOME", selected: true),
+        _BottomSvgButton(svgPath: 'assets/icons/search.svg', label: "SEARCH"),
+        _BottomSvgButton(svgPath: 'assets/icons/message.svg', label: "", isBig: true),
+        _BottomSvgButton(svgPath: 'assets/icons/map.svg', label: "MAP"),
+        _BottomSvgButton(svgPath: 'assets/icons/profile.svg', label: "PROFILE"),
+      ],
+    ),
+  ),
+),
+
     );
   }
 }
 
-class _BottomIconButton extends StatelessWidget {
-  final IconData icon;
+class _BottomSvgButton extends StatelessWidget {
+  final String svgPath;
   final String label;
   final bool selected;
   final bool isBig;
 
-  const _BottomIconButton({
-    required this.icon,
+  const _BottomSvgButton({
+    required this.svgPath,
     required this.label,
     this.selected = false,
     this.isBig = false,
@@ -170,21 +176,38 @@ class _BottomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? primary : Colors.white54;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: isBig ? 54 : 36,
-          height: isBig ? 54 : 36,
-          child: Icon(icon, color: color, size: isBig ? 34 : 26),
+        Transform.translate(
+          offset: isBig ? const Offset(0, -30) : Offset.zero,
+          child: SizedBox(
+            width: isBig ? 100 : 36,
+            height: isBig ? 100 : 36,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (selected)
+                  SvgPicture.asset(
+                    'assets/icons/backgroundselector.svg',
+                    width: isBig ? 100 : 36,
+                    height: isBig ? 100 : 36,
+                  ),
+                SvgPicture.asset(
+                  svgPath,
+                  width: isBig ? 80 : 26,
+                  height: isBig ? 80 : 26,
+                ),
+              ],
+            ),
+          ),
         ),
         if (label.isNotEmpty)
           Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: color,
+              color: primary,
               fontFamily: "RobotoMono",
               fontWeight: FontWeight.bold,
               fontSize: 13,
