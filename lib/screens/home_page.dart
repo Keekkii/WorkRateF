@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'profile.dart';
+import 'search.dart';
 
 const Color primary = Color(0xFF1156AC);
 
@@ -29,9 +31,20 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.add_circle_outline_rounded, color: primary, size: 32),
-                    onPressed: () {},
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.search, color: primary, size: 28),
+                      onPressed: () {
+                        print('Search button pressed - Using Builder');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SearchScreen(),
+                          ),
+                        ).then((_) {
+                          print('Returned from SearchScreen');
+                        });
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -176,9 +189,24 @@ class _BottomSvgButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return GestureDetector(
+      onTap: () {
+        if (label == "PROFILE") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          );
+        } else if (label == "SEARCH") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SearchScreen()),
+          );
+        }
+        // TODO: Add navigation for other tabs
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         Transform.translate(
           offset: isBig ? const Offset(0, -30) : Offset.zero,
           child: SizedBox(
@@ -214,7 +242,8 @@ class _BottomSvgButton extends StatelessWidget {
               letterSpacing: selected ? 1.2 : 0.5,
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

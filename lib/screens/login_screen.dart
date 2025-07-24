@@ -102,11 +102,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
         if (doc.exists) {
+          // User already has profile, go to home
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const HomePage()),
           );
         } else {
+          // User needs to complete profile
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
