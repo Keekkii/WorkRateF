@@ -47,6 +47,26 @@ class _SearchScreenState extends State<SearchScreen> {
     'Freelance',
   ];
 
+  // Filter options
+  final List<Map<String, dynamic>> _filters = [
+    {'title': 'JOB TITLE', 'value': null},
+    {'title': 'LOCATION', 'value': null},
+    {'title': 'EMPLOYMENT TYPE', 'value': null},
+    {'title': 'CONTRACT DURATION', 'value': null},
+    {'title': 'WORK SCHEDULE', 'value': null},
+    {'title': 'SALARY', 'value': null},
+    {'title': 'ACCOMMODATION', 'value': null},
+    {'title': 'EDUCATION LEVEL', 'value': null},
+    {'title': 'LANGUAGE REQUIREMENTS', 'value': null},
+    {'title': 'INTERNSHIP/APPRENTICESHIP', 'value': null},
+    {'title': 'INDUSTRY', 'value': null},
+    {'title': 'COMPANY SIZE', 'value': null},
+    {'title': 'COMPANY RATING', 'value': null},
+    {'title': 'REMOTE/IN-OFFICE', 'value': null},
+    {'title': 'DATE POSTED', 'value': null},
+    {'title': 'BENEFITS OFFERED', 'value': null},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,134 +134,91 @@ class _SearchScreenState extends State<SearchScreen> {
           child: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF1156AC), size: 22),
-              onPressed: () => Navigator.pop(context),
-            ),
+            automaticallyImplyLeading: false,
             title: const Text(
-              'Search',
+              'WORKRATE',
               style: TextStyle(
                 color: Color(0xFF1156AC),
                 fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
                 fontFamily: 'RobotoMono',
-                letterSpacing: 0.5,
+                letterSpacing: 2,
               ),
             ),
-            centerTitle: true,
+            centerTitle: false,
           ),
         ),
       ),
       body: Column(
         children: [
           // Search Bar
-          Padding(
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF757575), size: 26),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.tune, color: Color(0xFF1156AC), size: 26),
-                  onPressed: () {},
+                hintText: 'Search for jobs...',
+                hintStyle: const TextStyle(color: Color(0xFF999999)),
+                prefixIcon: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1156AC), size: 20),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
+                suffixIcon: const Icon(Icons.search, color: Color(0xFF1156AC), size: 24),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: const BorderSide(color: Color(0xFF1156AC)),
                 ),
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                hintStyle: const TextStyle(color: Color(0xFF757575), fontSize: 16),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: const BorderSide(color: Color(0xFF1156AC)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: const BorderSide(color: Color(0xFF1156AC), width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
               style: const TextStyle(fontSize: 16),
             ),
           ),
           
-          // Filter Sections
+          // Filter List
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader('Category'),
-                  _buildChipList(_categories, _selectedCategory, (value) {
-                    setState(() => _selectedCategory = value);
-                  }),
-                  
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Location'),
-                  _buildChipList(_locations, _selectedLocation, (value) {
-                    setState(() => _selectedLocation = value);
-                  }),
-                  
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Experience Level'),
-                  _buildChipList(_experienceLevels, _selectedExperience, (value) {
-                    setState(() => _selectedExperience = value);
-                  }),
-                  
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Job Type'),
-                  _buildChipList(_jobTypes, _selectedJobType, (value) {
-                    setState(() => _selectedJobType = value);
-                  }),
-                  
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Salary Range'),
-                  const SizedBox(height: 8),
-                  RangeSlider(
-                    values: _salaryRange,
-                    min: 0,
-                    max: 300,
-                    divisions: 30,
-                    activeColor: const Color(0xFF1156AC),
-                    inactiveColor: const Color(0xFFF5F5F5),
-                    labels: RangeLabels(
-                      '\$${_salaryRange.start.round()}k',
-                      '\$${_salaryRange.end.round()}k',
-                    ),
-                    onChanged: (values) {
-                      setState(() => _salaryRange = values);
-                    },
-                  ),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('\$0k', style: TextStyle(color: Color(0xFF757575))),
-                      Text('\$300k+', style: TextStyle(color: Color(0xFF757575))),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // TODO: Implement search
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1156AC),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Search Jobs',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              itemCount: _filters.length,
+              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              itemBuilder: (context, index) {
+                final filter = _filters[index];
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  title: Text(
+                    filter['title'] as String,
+                    style: const TextStyle(
+                      color: Color(0xFF1156AC),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                  trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xFF1156AC), size: 16),
+                  onTap: () {
+                    // TODO: Handle filter selection
+                  },
+                );
+              },
             ),
           ),
         ],
