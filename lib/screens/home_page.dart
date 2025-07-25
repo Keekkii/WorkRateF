@@ -199,7 +199,7 @@ class _BottomSvgButton extends StatelessWidget {
         } else if (label == "SEARCH") {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const SearchScreen()),
+            MaterialPageRoute(builder: (context) => const SearchScreen(),),
           );
         }
         // TODO: Add navigation for other tabs

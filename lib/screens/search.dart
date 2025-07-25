@@ -1,211 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'profile.dart';
+import '../services/location_service.dart';
+import './home_page.dart' show _BottomSvgButton;
 
-class ExpandableFilter extends StatefulWidget {
-  final String title;
-  final List<String> options;
-  final List<String> selectedOptions;
-  final ValueChanged<List<String>> onSelectionChanged;
-
-  const ExpandableFilter({
-    Key? key,
-    required this.title,
-    required this.options,
-    this.selectedOptions = const [],
-    required this.onSelectionChanged,
-  }) : super(key: key);
-
-  @override
-  _ExpandableFilterState createState() => _ExpandableFilterState();
-}
-
-class _ExpandableFilterState extends State<ExpandableFilter> {
-  bool _isExpanded = false;
-  final TextEditingController _searchController = TextEditingController();
-  late List<String> _filteredOptions;
-  late List<String> _selectedOptions;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedOptions = List.from(widget.selectedOptions);
-    _filteredOptions = List.from(widget.options);
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
-  void didUpdateWidget(ExpandableFilter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedOptions != oldWidget.selectedOptions) {
-      setState(() {
-        _selectedOptions = List.from(widget.selectedOptions);
-      });
-    }
-  }
-
-  void _onSearchChanged() {
-    setState(() {
-      final query = _searchController.text.toLowerCase();
-      _filteredOptions = widget.options
-          .where((option) => option.toLowerCase().contains(query))
-          .toList();
-    });
-  }
-
-  void _toggleOption(String option) {
-    setState(() {
-      if (_selectedOptions.contains(option)) {
-        _selectedOptions.remove(option);
-      } else {
-        _selectedOptions.add(option);
-      }
-      widget.onSelectionChanged(_selectedOptions);
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Header
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-              if (!_isExpanded) {
-                _searchController.clear();
-              }
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            color: _isExpanded ? const Color(0xFF1156AC) : Colors.transparent,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.title,
-                  style: TextStyle(
-                    color: _isExpanded ? Colors.white : const Color(0xFF1156AC),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Icon(
-                  _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_right,
-                  color: _isExpanded ? Colors.white : const Color(0xFF1156AC),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-        
-        // Expanded content
-        if (_isExpanded)
-          Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-                // Search bar
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'SEARCH...',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF999999),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        letterSpacing: 1.0,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF5F5F5),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF1156AC),
-                          width: 1.0,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF1156AC),
-                          width: 1.0,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF1156AC),
-                          width: 1.5,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF1156AC), size: 20),
-                    ),
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                ),
-                
-                // Options list
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _filteredOptions.length,
-                    itemBuilder: (context, index) {
-                      final option = _filteredOptions[index];
-                      final isSelected = _selectedOptions.contains(option);
-                      
-                      return Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey[200]!,
-                              width: 1.0,
-                            ),
-                          ),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            option,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          trailing: Checkbox(
-                            value: isSelected,
-                            onChanged: (_) => _toggleOption(option),
-                            activeColor: const Color(0xFF1156AC),
-                            checkColor: Colors.white,
-                          ),
-                          onTap: () => _toggleOption(option),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
+const Color primary = Color(0xFF1156AC);
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -215,323 +16,254 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  final LocationService _locationService = LocationService();
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  
+  // Job titles
+  List<String> _jobTitles = [];
+  List<String> _selectedJobTitles = [];
+  
+  // Selected values
   String? _selectedCategory;
   String? _selectedLocation;
   String? _selectedExperience;
   String? _selectedJobType;
+  String? _selectedContractDuration;
+  String? _selectedWorkSchedule;
+  String? _selectedSalary;
+  String? _selectedAccommodation;
   RangeValues _salaryRange = const RangeValues(0, 150);
-  final TextEditingController _searchController = TextEditingController();
 
-  final List<String> _categories = [
-    'Design',
-    'Development',
-    'Marketing',
-    'Business',
-    'Photography',
-  ];
-
-  final List<String> _locations = [
-    'Remote',
-    'New York',
-    'San Francisco',
-    'London',
-    'Berlin',
-  ];
-
-  final List<String> _experienceLevels = [
-    'Entry Level',
-    'Mid Level',
-    'Senior Level',
-    'Executive',
-  ];
-
-  final List<String> _jobTypes = [
-    'Full-time',
-    'Part-time',
-    'Contract',
-    'Freelance',
-  ];
-
-  // Job titles loaded from the asset file
-  final List<String> _jobTitles = [];
-  bool _isLoadingJobTitles = true;
-  
-  // Selected job titles
-  final List<String> _selectedJobTitles = [];
-  
   @override
   void initState() {
     super.initState();
     _loadJobTitles();
   }
-  
-  // Load job titles from the asset file
+
   Future<void> _loadJobTitles() async {
     try {
-      final String response = await rootBundle.loadString('assets/data/job_titles.txt');
-      final List<String> titles = response.split('\n').where((title) => title.trim().isNotEmpty).toList();
+      final String data = await rootBundle.loadString('assets/data/job_titles.txt');
       setState(() {
-        _jobTitles.addAll(titles);
-        _isLoadingJobTitles = false;
+        _jobTitles = data.split('\n').where((title) => title.trim().isNotEmpty).toList();
       });
     } catch (e) {
-      debugPrint('Error loading job titles: $e');
-      setState(() {
-        _isLoadingJobTitles = false;
-      });
+      print('Error loading job titles: $e');
     }
   }
-  
-  // Filter options
-  final List<Map<String, dynamic>> _filters = [
-    {'title': 'JOB TITLE', 'isExpandable': true},
-    {'title': 'LOCATION', 'isExpandable': false},
-    {'title': 'EMPLOYMENT TYPE', 'isExpandable': false},
-    {'title': 'CONTRACT DURATION', 'isExpandable': false},
-    {'title': 'WORK SCHEDULE', 'isExpandable': false},
-    {'title': 'SALARY', 'isExpandable': false},
-    {'title': 'ACCOMMODATION', 'isExpandable': false},
-    {'title': 'EDUCATION LEVEL', 'isExpandable': false},
-    {'title': 'LANGUAGE REQUIREMENTS', 'isExpandable': false},
-    {'title': 'INTERNSHIP/APPRENTICESHIP', 'isExpandable': false},
-    {'title': 'INDUSTRY', 'isExpandable': false},
-    {'title': 'COMPANY SIZE', 'isExpandable': false},
-    {'title': 'COMPANY RATING', 'isExpandable': false},
-    {'title': 'REMOTE/IN-OFFICE', 'isExpandable': false},
-    {'title': 'DATE POSTED', 'isExpandable': false},
-    {'title': 'BENEFITS OFFERED', 'isExpandable': false},
-  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // Bottom Navigation Bar
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Color(0xFF1156AC)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Search',
+          style: TextStyle(
+            color: Color(0xFF1156AC),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFEEEEEE),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-        child: SizedBox(
-          height: 80,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomSvgButton(
-                svgPath: 'assets/icons/home.svg',
-                label: "HOME",
-                onTap: () => Navigator.pop(context),
-              ),
-              _BottomSvgButton(
-                svgPath: 'assets/icons/search.svg',
-                label: "SEARCH",
-                selected: true,
-                onTap: () {},
-              ),
-              _BottomSvgButton(
-                svgPath: 'assets/icons/message.svg',
-                label: "",
-                isBig: true,
-                onTap: () {
-                  // TODO: Implement message navigation
-                },
-              ),
-              _BottomSvgButton(
-                svgPath: 'assets/icons/map.svg',
-                label: "MAP",
-                onTap: () {
-                  // TODO: Implement map navigation
-                },
-              ),
-              _BottomSvgButton(
-                svgPath: 'assets/icons/profile.svg',
-                label: "PROFILE",
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
-      ),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 1),
-        child: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Color(0xFFEEEEEE),
-                width: 1.0,
-              ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _BottomSvgButton(
+              svgPath: 'assets/icons/home.svg',
+              label: 'HOME',
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
-          ),
-          child: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            title: const Text(
-              'WORKRATE',
-              style: TextStyle(
-                color: Color(0xFF1156AC),
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                fontFamily: 'RobotoMono',
-                letterSpacing: 2,
-              ),
+            _BottomSvgButton(
+              svgPath: 'assets/icons/search.svg',
+              label: 'SEARCH',
+              selected: true,
+              isBig: true,
+              onTap: () {},
             ),
-            centerTitle: false,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
+            _BottomSvgButton(
+              svgPath: 'assets/icons/plus.svg',
+              label: 'POST',
+              onTap: () {
+                // TODO: Implement post screen navigation
+              },
             ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search for jobs...',
-                hintStyle: const TextStyle(color: Color(0xFF999999)),
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1156AC), size: 20),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                suffixIcon: const Icon(Icons.search, color: Color(0xFF1156AC), size: 24),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Color(0xFF1156AC)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Color(0xFF1156AC)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: const BorderSide(color: Color(0xFF1156AC), width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              ),
-              style: const TextStyle(fontSize: 16),
+            _BottomSvgButton(
+              svgPath: 'assets/icons/chat.svg',
+              label: 'CHAT',
+              onTap: () {
+                // TODO: Implement chat screen navigation
+              },
             ),
-          ),
-          
-          // Filter List
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: _filters.length,
-              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
-              itemBuilder: (context, index) {
-                final filter = _filters[index];
-                
-                // Special case for JOB TITLE which uses the expandable filter
-                if (filter['title'] == 'JOB TITLE') {
-                  if (_isLoadingJobTitles) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(child: CircularProgressIndicator(color: Color(0xFF1156AC))),
-                    );
-                  }
-                  return ExpandableFilter(
-                    title: 'JOB TITLE',
-                    options: _jobTitles,
-                    selectedOptions: _selectedJobTitles,
-                    onSelectionChanged: (selected) {
-                      setState(() {
-                        _selectedJobTitles.clear();
-                        _selectedJobTitles.addAll(selected);
-                      });
-                    },
-                  );
-                }
-                
-                // Regular filter item for all others
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  title: Text(
-                    filter['title'] as String,
-                    style: const TextStyle(
-                      color: Color(0xFF1156AC),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xFF1156AC), size: 16),
-                  onTap: () {
-                    // TODO: Handle other filter selections
-                  },
+            _BottomSvgButton(
+              svgPath: 'assets/icons/profile.svg',
+              label: 'PROFILE',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search Field
+            Container(
+              margin: const EdgeInsets.only(bottom: 8.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search for jobs...',
+                  prefixIcon: const Icon(Icons.search, color: Color(0xFF757575)),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Job Title Expandable Filter
+            ExpandableFilter(
+              title: 'JOB TITLE:',
+              options: _jobTitles,
+              selectedOptions: _selectedJobTitles,
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedJobTitles = selected;
+                });
+              },
+              isJobTitleFilter: true,
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Location Expandable Filter
+            ExpandableFilter(
+              title: 'LOCATION:',
+              options: [],
+              selectedOptions: _selectedLocation != null ? [_selectedLocation!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedLocation = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+              isLocationFilter: true,
+              locationService: _locationService,
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Employment Type
+            ExpandableFilter(
+              title: 'EMPLOYMENT TYPE:',
+              options: ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'],
+              selectedOptions: _selectedJobType != null ? [_selectedJobType!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedJobType = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Contract Duration
+            ExpandableFilter(
+              title: 'CONTRACT DURATION:',
+              options: ['Permanent', 'Temporary', '3 months', '6 months', '1 year', '2+ years'],
+              selectedOptions: _selectedContractDuration != null ? [_selectedContractDuration!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedContractDuration = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Work Schedule
+            ExpandableFilter(
+              title: 'WORK SCHEDULE:',
+              options: ['Monday-Friday', 'Weekends', 'Flexible', 'Shift work', 'Night shift'],
+              selectedOptions: _selectedWorkSchedule != null ? [_selectedWorkSchedule!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedWorkSchedule = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Salary
+            ExpandableFilter(
+              title: 'SALARY:',
+              options: ['< 5,000 HRK', '5,000 - 10,000 HRK', '10,000 - 15,000 HRK', '15,000+ HRK'],
+              selectedOptions: _selectedSalary != null ? [_selectedSalary!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedSalary = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Accommodation
+            ExpandableFilter(
+              title: 'ACCOMMODATION:',
+              options: ['Provided', 'Not provided', 'Assistance available'],
+              selectedOptions: _selectedAccommodation != null ? [_selectedAccommodation!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedAccommodation = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
   }
-
-  Widget _buildChipList(List<String> items, String? selected, ValueChanged<String> onSelected) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: items.map((item) {
-        final isSelected = selected == item;
-        return ChoiceChip(
-          label: Text(
-            item,
-            style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF757575),
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-          backgroundColor: const Color(0xFFF5F5F5),
-          selectedColor: const Color(0xFF1156AC),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) onSelected(item);
-          },
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: isSelected ? const Color(0xFF1156AC) : const Color(0xFFE0E0E0),
-              width: isSelected ? 0 : 1,
-            ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          labelPadding: const EdgeInsets.all(0),
-        );
-      }).toList(),
-    );
-  }
+  
 }
 
 class _BottomSvgButton extends StatelessWidget {
@@ -544,15 +276,13 @@ class _BottomSvgButton extends StatelessWidget {
   const _BottomSvgButton({
     required this.svgPath,
     required this.label,
-    required this.onTap,
     this.selected = false,
     this.isBig = false,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    const Color primary = Color(0xFF1156AC);
-    
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -596,5 +326,219 @@ class _BottomSvgButton extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class ExpandableFilter extends StatefulWidget {
+  final String title;
+  final List<String> options;
+  final List<String> selectedOptions;
+  final ValueChanged<List<String>> onSelectionChanged;
+  final bool isJobTitleFilter;
+  final bool isLocationFilter;
+  final LocationService? locationService;
+
+  const ExpandableFilter({
+    Key? key,
+    required this.title,
+    required this.options,
+    required this.selectedOptions,
+    required this.onSelectionChanged,
+    this.isJobTitleFilter = false,
+    this.isLocationFilter = false,
+    this.locationService,
+  }) : super(key: key);
+
+  @override
+  _ExpandableFilterState createState() => _ExpandableFilterState();
+}
+
+class _ExpandableFilterState extends State<ExpandableFilter> {
+  bool _isExpanded = false;
+  final TextEditingController _searchController = TextEditingController();
+  List<String> _filteredOptions = [];
+  List<String> _selectedOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredOptions = widget.options;
+    _selectedOptions = List.from(widget.selectedOptions);
+    _searchController.addListener(_filterOptions);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterOptions() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredOptions = widget.options;
+      } else {
+        _filteredOptions = widget.options
+            .where((option) => option.toLowerCase().contains(query))
+            .toList();
+      }
+    });
+  }
+
+  void _toggleOption(String option) {
+    setState(() {
+      if (widget.isLocationFilter || widget.title.contains('EMPLOYMENT') || 
+          widget.title.contains('CONTRACT') || widget.title.contains('WORK') ||
+          widget.title.contains('SALARY') || widget.title.contains('ACCOMMODATION')) {
+        // Single selection for location and other filters
+        _selectedOptions = _selectedOptions.contains(option) ? [] : [option];
+      } else {
+        // Multiple selection for job titles
+        if (_selectedOptions.contains(option)) {
+          _selectedOptions.remove(option);
+        } else {
+          _selectedOptions.add(option);
+        }
+      }
+      widget.onSelectionChanged(_selectedOptions);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        color: Color(0xFF1156AC),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_right,
+                    color: const Color(0xFF1156AC),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Content
+          if (_isExpanded) ..._buildExpandedContent(),
+        ],
+      ),
+    );
+  }
+  
+  List<Widget> _buildExpandedContent() {
+    if (widget.isLocationFilter) {
+      return [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: TypeAheadField<String>(
+            controller: TextEditingController(text: _selectedOptions.isNotEmpty ? _selectedOptions.first : ''),
+            builder: (context, controller, focusNode) {
+              return TextField(
+                controller: controller,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: 'Search for a city in Croatia...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                  ),
+                ),
+              );
+            },
+            suggestionsCallback: (pattern) async {
+              if (pattern.length < 2) return [];
+              return await widget.locationService!.searchCities(pattern);
+            },
+            itemBuilder: (context, suggestion) => ListTile(
+              leading: const Icon(Icons.location_city, size: 20),
+              title: Text(suggestion),
+            ),
+            onSelected: (suggestion) {
+              setState(() {
+                _selectedOptions = [suggestion];
+                widget.onSelectionChanged(_selectedOptions);
+              });
+            },
+            emptyBuilder: (context) => const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Text('No locations found'),
+            ),
+          ),
+        ),
+      ];
+    } else {
+      return [
+        // Search field for job titles and other filters
+        if (widget.isJobTitleFilter)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search ${widget.title.toLowerCase()}...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                ),
+              ),
+            ),
+          ),
+        Container(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: _filteredOptions.length,
+            itemBuilder: (context, index) {
+              final option = _filteredOptions[index];
+              final isSelected = _selectedOptions.contains(option);
+              
+              return ListTile(
+                title: Text(option),
+                leading: Checkbox(
+                  value: isSelected,
+                  onChanged: (_) => _toggleOption(option),
+                  activeColor: const Color(0xFF1156AC),
+                ),
+                onTap: () => _toggleOption(option),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+                dense: true,
+              );
+            },
+          ),
+        ),
+      ];
+    }
   }
 }
