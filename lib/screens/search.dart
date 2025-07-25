@@ -78,59 +78,53 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _BottomSvgButton(
-              svgPath: 'assets/icons/home.svg',
-              label: 'HOME',
-              onTap: () {
-                Navigator.pop(context);
+        color: Color(0xFFEEEEEE),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+        child: SizedBox(
+          height: 80,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _BottomSvgButton(
+                svgPath: 'assets/icons/home.svg',
+                label: 'HOME',
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/search.svg',
+                label: 'SEARCH',
+                selected: true,
+                onTap: () {},
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/message.svg',
+                label: '',
+                isBig: true,
+                onTap: () {
+                  // TODO: Implement chat screen navigation
+                },
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/map.svg',
+                label: 'MAP',
+                onTap: () {
+                  // TODO: Implement map screen navigation
+                },
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/profile.svg',
+                label: 'PROFILE',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
               },
             ),
-            _BottomSvgButton(
-              svgPath: 'assets/icons/search.svg',
-              label: 'SEARCH',
-              selected: true,
-              isBig: true,
-              onTap: () {},
-            ),
-            _BottomSvgButton(
-              svgPath: 'assets/icons/plus.svg',
-              label: 'POST',
-              onTap: () {
-                // TODO: Implement post screen navigation
-              },
-            ),
-            _BottomSvgButton(
-              svgPath: 'assets/icons/chat.svg',
-              label: 'CHAT',
-              onTap: () {
-                // TODO: Implement chat screen navigation
-              },
-            ),
-            _BottomSvgButton(
-              svgPath: 'assets/icons/profile.svg',
-              label: 'PROFILE',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(
