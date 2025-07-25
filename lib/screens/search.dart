@@ -57,169 +57,44 @@ class _SearchScreenState extends State<SearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
         child: SizedBox(
           height: 80,
-          child: Stack(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Bottom navigation items
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // Home Button
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/home.svg',
-                            width: 26,
-                            height: 26,
-                            color: const Color(0xFF757575),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'HOME',
-                            style: TextStyle(
-                              color: Color(0xFF757575),
-                              fontFamily: 'RobotoMono',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Empty space for search button (will be positioned absolutely)
-                  const SizedBox(width: 60),
-                  
-                  // Empty space for message button (will be positioned absolutely)
-                  const SizedBox(width: 60),
-                  
-                  // Map Button
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: Implement map navigation
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/map.svg',
-                            width: 26,
-                            height: 26,
-                            color: const Color(0xFF757575),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'MAP',
-                            style: TextStyle(
-                              color: Color(0xFF757575),
-                              fontFamily: 'RobotoMono',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Profile Button
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/profile.svg',
-                            width: 26,
-                            height: 26,
-                            color: const Color(0xFF757575),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'PROFILE',
-                            style: TextStyle(
-                              color: Color(0xFF757575),
-                              fontFamily: 'RobotoMono',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+              _BottomSvgButton(
+                svgPath: 'assets/icons/home.svg',
+                label: "HOME",
+                onTap: () => Navigator.pop(context),
               ),
-              
-              // Search Button (Active with background selector)
-              Positioned(
-                left: MediaQuery.of(context).size.width * 0.21,
-                top: 8,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/search.svg',
-                          width: 24,
-                          height: 24,
-                          color: const Color(0xFF1156AC),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'SEARCH',
-                          style: TextStyle(
-                            color: Color(0xFF1156AC),
-                            fontFamily: 'RobotoMono',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/search.svg',
+                label: "SEARCH",
+                selected: true,
+                onTap: () {},
               ),
-              
-              // Message Button (Big)
-              Positioned(
-                left: MediaQuery.of(context).size.width * 0.5 - 28,
-                top: -14,
-                child: GestureDetector(
-                  onTap: () {
-                    // TODO: Implement message navigation
-                  },
-                  child: SvgPicture.asset(
-                    'assets/icons/message.svg',
-                    width: 56,
-                    height: 56,
-                  ),
-                ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/message.svg',
+                label: "",
+                isBig: true,
+                onTap: () {
+                  // TODO: Implement message navigation
+                },
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/map.svg',
+                label: "MAP",
+                onTap: () {
+                  // TODO: Implement map navigation
+                },
+              ),
+              _BottomSvgButton(
+                svgPath: 'assets/icons/profile.svg',
+                label: "PROFILE",
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
+                },
               ),
             ],
           ),
@@ -420,6 +295,71 @@ class _SearchScreenState extends State<SearchScreen> {
           labelPadding: const EdgeInsets.all(0),
         );
       }).toList(),
+    );
+  }
+}
+
+class _BottomSvgButton extends StatelessWidget {
+  final String svgPath;
+  final String label;
+  final bool selected;
+  final bool isBig;
+  final VoidCallback onTap;
+
+  const _BottomSvgButton({
+    required this.svgPath,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+    this.isBig = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const Color primary = Color(0xFF1156AC);
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.translate(
+            offset: isBig ? const Offset(0, -30) : Offset.zero,
+            child: SizedBox(
+              width: isBig ? 100 : 36,
+              height: isBig ? 100 : 36,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (selected)
+                    SvgPicture.asset(
+                      'assets/icons/backgroundselector.svg',
+                      width: isBig ? 100 : 36,
+                      height: isBig ? 100 : 36,
+                    ),
+                  SvgPicture.asset(
+                    svgPath,
+                    width: isBig ? 80 : 26,
+                    height: isBig ? 80 : 26,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (label.isNotEmpty)
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: primary,
+                fontFamily: "RobotoMono",
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: selected ? 1.2 : 0.5,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
