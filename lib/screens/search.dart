@@ -74,17 +74,18 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Color(0xFF1156AC)),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false, // This removes the back button
         title: const Text(
-          'Search',
+          "WORKRATE",
           style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontFamily: 'RobotoMono',
+            fontSize: 27,
+            letterSpacing: 2,
             color: Color(0xFF1156AC),
-            fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true, // This centers the title
       ),
       bottomNavigationBar: Container(
         color: Color(0xFFEEEEEE),
