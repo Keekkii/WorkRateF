@@ -33,6 +33,15 @@ class _SearchScreenState extends State<SearchScreen> {
   String? _selectedWorkSchedule;
   String? _selectedSalary;
   String? _selectedAccommodation;
+  String? _selectedEducationLevel;
+  String? _selectedLanguage;
+  String? _selectedInternshipType;
+  String? _selectedIndustry;
+  String? _selectedCompanySize;
+  String? _selectedCompanyRating;
+  String? _selectedWorkLocation;
+  String? _selectedDatePosted;
+  List<String> _selectedBenefits = [];
   RangeValues _salaryRange = const RangeValues(0, 150);
 
   @override
@@ -247,6 +256,132 @@ class _SearchScreenState extends State<SearchScreen> {
               onSelectionChanged: (selected) {
                 setState(() {
                   _selectedAccommodation = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Education Level
+            ExpandableFilter(
+              title: 'EDUCATION LEVEL:',
+              options: ['High School', 'Associate Degree', "Bachelor's Degree", "Master's Degree", 'PhD', 'No Formal Education Required'],
+              selectedOptions: _selectedEducationLevel != null ? [_selectedEducationLevel!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedEducationLevel = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Language Requirements
+            ExpandableFilter(
+              title: 'LANGUAGE REQUIREMENTS:',
+              options: ['English', 'German', 'Croatian', 'Italian', 'French', 'Spanish'],
+              selectedOptions: _selectedLanguage != null ? [_selectedLanguage!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedLanguage = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Internship/Apprenticeship
+            ExpandableFilter(
+              title: 'INTERNSHIP/APPRENTICESHIP:',
+              options: ['Internship', 'Apprenticeship', 'Both', 'Not specified'],
+              selectedOptions: _selectedInternshipType != null ? [_selectedInternshipType!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedInternshipType = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Industry
+            ExpandableFilter(
+              title: 'INDUSTRY:',
+              options: ['IT', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing', 'Hospitality', 'Other'],
+              selectedOptions: _selectedIndustry != null ? [_selectedIndustry!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedIndustry = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Company Size
+            ExpandableFilter(
+              title: 'COMPANY SIZE:',
+              options: ['1-10 employees', '11-50 employees', '51-200 employees', '201-1000 employees', '1000+ employees'],
+              selectedOptions: _selectedCompanySize != null ? [_selectedCompanySize!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedCompanySize = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Company Rating
+            ExpandableFilter(
+              title: 'COMPANY RATING:',
+              options: ['4.0+', '3.5+', '3.0+', '2.5+', '2.0+', 'No minimum rating'],
+              selectedOptions: _selectedCompanyRating != null ? [_selectedCompanyRating!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedCompanyRating = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Remote/In-Office
+            ExpandableFilter(
+              title: 'REMOTE/IN-OFFICE:',
+              options: ['Remote', 'On-site', 'Hybrid', 'Flexible'],
+              selectedOptions: _selectedWorkLocation != null ? [_selectedWorkLocation!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedWorkLocation = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Date Posted
+            ExpandableFilter(
+              title: 'DATE POSTED:',
+              options: ['Last 24 hours', 'Last 3 days', 'Last week', 'Last 2 weeks', 'Last month', 'Any time'],
+              selectedOptions: _selectedDatePosted != null ? [_selectedDatePosted!] : [],
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedDatePosted = selected.isNotEmpty ? selected.first : null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Benefits Offered
+            ExpandableFilter(
+              title: 'BENEFITS OFFERED:',
+              options: ['Health insurance', 'Dental insurance', 'Paid time off', 'Retirement plan', 'Flexible schedule', 'Professional development', 'Gym membership', 'Free food'],
+              selectedOptions: _selectedBenefits,
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedBenefits = selected;
                 });
               },
             ),
