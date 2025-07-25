@@ -42,7 +42,8 @@ class _SearchScreenState extends State<SearchScreen> {
   String? _selectedWorkLocation;
   String? _selectedDatePosted;
   List<String> _selectedBenefits = [];
-  RangeValues _salaryRange = const RangeValues(0, 150);
+  List<String> _selectedSalaryFrequencies = [];
+  RangeValues _hourlyPayRange = const RangeValues(6.06, 101.5);
 
   @override
   void initState() {
@@ -196,7 +197,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Employment Type
             ExpandableFilter(
               title: 'EMPLOYMENT TYPE:',
-              options: ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'],
+              options: ['Full Time', 'Part Time', 'One Time', 'Freelance'],
               selectedOptions: _selectedJobType != null ? [_selectedJobType!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -210,7 +211,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Contract Duration
             ExpandableFilter(
               title: 'CONTRACT DURATION:',
-              options: ['Permanent', 'Temporary', '3 months', '6 months', '1 year', '2+ years'],
+              options: ['Permanent', 'Temporary', 'Seasonal', 'Project-based', 'As-needed'],
               selectedOptions: _selectedContractDuration != null ? [_selectedContractDuration!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -224,7 +225,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Work Schedule
             ExpandableFilter(
               title: 'WORK SCHEDULE:',
-              options: ['Monday-Friday', 'Weekends', 'Flexible', 'Shift work', 'Night shift'],
+              options: ['Standard Hours', 'Non-standard Hours', 'Flexible', 'Shift-based'],
               selectedOptions: _selectedWorkSchedule != null ? [_selectedWorkSchedule!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -235,16 +236,57 @@ class _SearchScreenState extends State<SearchScreen> {
             
             const SizedBox(height: 8),
             
-            // Salary
+            // Salary Filter with Frequency and Hourly Pay
             ExpandableFilter(
               title: 'SALARY:',
-              options: ['< 5,000 HRK', '5,000 - 10,000 HRK', '10,000 - 15,000 HRK', '15,000+ HRK'],
-              selectedOptions: _selectedSalary != null ? [_selectedSalary!] : [],
+              options: const ['Weekly', 'Bi-Weekly', 'Monthly', 'Commission-Based'],
+              selectedOptions: _selectedSalaryFrequencies,
               onSelectionChanged: (selected) {
                 setState(() {
-                  _selectedSalary = selected.isNotEmpty ? selected.first : null;
+                  _selectedSalaryFrequencies = selected;
                 });
               },
+              customContent: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  const Text(
+                    'HOURLY PAY',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  RangeSlider(
+                    values: _hourlyPayRange,
+                    min: 0,
+                    max: 150,
+                    divisions: 100,
+                    labels: RangeLabels(
+                      '${_hourlyPayRange.start.toStringAsFixed(2)}€',
+                      '${_hourlyPayRange.end.toStringAsFixed(2)}€',
+                    ),
+                    onChanged: (RangeValues values) {
+                      setState(() {
+                        _hourlyPayRange = values;
+                      });
+                    },
+                    activeColor: const Color(0xFF1156AC),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${_hourlyPayRange.start.toStringAsFixed(2)}€'),
+                        Text('${_hourlyPayRange.end.toStringAsFixed(2)}€'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             
             const SizedBox(height: 8),
@@ -467,6 +509,7 @@ class ExpandableFilter extends StatefulWidget {
   final bool isJobTitleFilter;
   final bool isLocationFilter;
   final LocationService? locationService;
+  final Widget? customContent;
 
   const ExpandableFilter({
     Key? key,
@@ -477,6 +520,7 @@ class ExpandableFilter extends StatefulWidget {
     this.isJobTitleFilter = false,
     this.isLocationFilter = false,
     this.locationService,
+    this.customContent,
   }) : super(key: key);
 
   @override
@@ -537,138 +581,92 @@ class _ExpandableFilterState extends State<ExpandableFilter> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
+        side: BorderSide(color: Colors.grey[300]!),
       ),
-      child: Column(
-        children: [
-          // Header
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: Color(0xFF1156AC),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_right,
-                    color: const Color(0xFF1156AC),
-                  ),
-                ],
-              ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          title: Text(
+            '${widget.title} ${_selectedOptions.isNotEmpty && !widget.title.contains('SALARY') ? '(${_selectedOptions.join(', ')})' : ''}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
           ),
-          
-          // Content
-          if (_isExpanded) ..._buildExpandedContent(),
-        ],
+          trailing: Icon(
+            _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+            color: Colors.grey[600],
+          ),
+          onExpansionChanged: (expanded) {
+            setState(() {
+              _isExpanded = expanded;
+            });
+          },
+          children: [
+            if (widget.isJobTitleFilter || widget.isLocationFilter)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search ${widget.title.toLowerCase().replaceAll(':', '')}',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            
+            if (widget.customContent != null)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: widget.customContent!,
+              ),
+            
+            if (widget.options.isNotEmpty)
+              Container(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _filteredOptions.length,
+                  itemBuilder: (context, index) {
+                    final option = _filteredOptions[index];
+                    final isSelected = _selectedOptions.contains(option);
+                    
+                    return ListTile(
+                      title: Text(option),
+                      leading: Checkbox(
+                        value: isSelected,
+                        onChanged: (_) => _toggleOption(option),
+                        activeColor: const Color(0xFF1156AC),
+                      ),
+                      onTap: () => _toggleOption(option),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
-  }
-  
-  List<Widget> _buildExpandedContent() {
-    if (widget.isLocationFilter) {
-      return [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: TypeAheadField<String>(
-            controller: TextEditingController(text: _selectedOptions.isNotEmpty ? _selectedOptions.first : ''),
-            builder: (context, controller, focusNode) {
-              return TextField(
-                controller: controller,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  hintText: 'Search for a city in Croatia...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                  ),
-                ),
-              );
-            },
-            suggestionsCallback: (pattern) async {
-              if (pattern.length < 2) return [];
-              return await widget.locationService!.searchCities(pattern);
-            },
-            itemBuilder: (context, suggestion) => ListTile(
-              leading: const Icon(Icons.location_city, size: 20),
-              title: Text(suggestion),
-            ),
-            onSelected: (suggestion) {
-              setState(() {
-                _selectedOptions = [suggestion];
-                widget.onSelectionChanged(_selectedOptions);
-              });
-            },
-            emptyBuilder: (context) => const Padding(
-              padding: EdgeInsets.all(12.0),
-              child: Text('No locations found'),
-            ),
-          ),
-        ),
-      ];
-    } else {
-      return [
-        // Search field for job titles and other filters
-        if (widget.isJobTitleFilter)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search ${widget.title.toLowerCase()}...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                ),
-              ),
-            ),
-          ),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 200),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _filteredOptions.length,
-            itemBuilder: (context, index) {
-              final option = _filteredOptions[index];
-              final isSelected = _selectedOptions.contains(option);
-              
-              return ListTile(
-                title: Text(option),
-                leading: Checkbox(
-                  value: isSelected,
-                  onChanged: (_) => _toggleOption(option),
-                  activeColor: const Color(0xFF1156AC),
-                ),
-                onTap: () => _toggleOption(option),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-                dense: true,
-              );
-            },
-          ),
-        ),
-      ];
-    }
   }
 }
