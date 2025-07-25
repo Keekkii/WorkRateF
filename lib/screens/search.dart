@@ -1,6 +1,211 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'profile.dart';
+
+class ExpandableFilter extends StatefulWidget {
+  final String title;
+  final List<String> options;
+  final List<String> selectedOptions;
+  final ValueChanged<List<String>> onSelectionChanged;
+
+  const ExpandableFilter({
+    Key? key,
+    required this.title,
+    required this.options,
+    this.selectedOptions = const [],
+    required this.onSelectionChanged,
+  }) : super(key: key);
+
+  @override
+  _ExpandableFilterState createState() => _ExpandableFilterState();
+}
+
+class _ExpandableFilterState extends State<ExpandableFilter> {
+  bool _isExpanded = false;
+  final TextEditingController _searchController = TextEditingController();
+  late List<String> _filteredOptions;
+  late List<String> _selectedOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedOptions = List.from(widget.selectedOptions);
+    _filteredOptions = List.from(widget.options);
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didUpdateWidget(ExpandableFilter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedOptions != oldWidget.selectedOptions) {
+      setState(() {
+        _selectedOptions = List.from(widget.selectedOptions);
+      });
+    }
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      final query = _searchController.text.toLowerCase();
+      _filteredOptions = widget.options
+          .where((option) => option.toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
+  void _toggleOption(String option) {
+    setState(() {
+      if (_selectedOptions.contains(option)) {
+        _selectedOptions.remove(option);
+      } else {
+        _selectedOptions.add(option);
+      }
+      widget.onSelectionChanged(_selectedOptions);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Header
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+              if (!_isExpanded) {
+                _searchController.clear();
+              }
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            color: _isExpanded ? const Color(0xFF1156AC) : Colors.transparent,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: _isExpanded ? Colors.white : const Color(0xFF1156AC),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Icon(
+                  _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_right,
+                  color: _isExpanded ? Colors.white : const Color(0xFF1156AC),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Expanded content
+        if (_isExpanded)
+          Container(
+            color: Colors.white,
+            child: Column(
+              children: [
+                // Search bar
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'SEARCH...',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF999999),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 1.0,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF5F5F5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1156AC),
+                          width: 1.0,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1156AC),
+                          width: 1.0,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF1156AC),
+                          width: 1.5,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF1156AC), size: 20),
+                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                ),
+                
+                // Options list
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _filteredOptions.length,
+                    itemBuilder: (context, index) {
+                      final option = _filteredOptions[index];
+                      final isSelected = _selectedOptions.contains(option);
+                      
+                      return Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.grey[200]!,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            option,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          trailing: Checkbox(
+                            value: isSelected,
+                            onChanged: (_) => _toggleOption(option),
+                            activeColor: const Color(0xFF1156AC),
+                            checkColor: Colors.white,
+                          ),
+                          onTap: () => _toggleOption(option),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -47,24 +252,54 @@ class _SearchScreenState extends State<SearchScreen> {
     'Freelance',
   ];
 
+  // Job titles loaded from the asset file
+  final List<String> _jobTitles = [];
+  bool _isLoadingJobTitles = true;
+  
+  // Selected job titles
+  final List<String> _selectedJobTitles = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadJobTitles();
+  }
+  
+  // Load job titles from the asset file
+  Future<void> _loadJobTitles() async {
+    try {
+      final String response = await rootBundle.loadString('assets/data/job_titles.txt');
+      final List<String> titles = response.split('\n').where((title) => title.trim().isNotEmpty).toList();
+      setState(() {
+        _jobTitles.addAll(titles);
+        _isLoadingJobTitles = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading job titles: $e');
+      setState(() {
+        _isLoadingJobTitles = false;
+      });
+    }
+  }
+  
   // Filter options
   final List<Map<String, dynamic>> _filters = [
-    {'title': 'JOB TITLE', 'value': null},
-    {'title': 'LOCATION', 'value': null},
-    {'title': 'EMPLOYMENT TYPE', 'value': null},
-    {'title': 'CONTRACT DURATION', 'value': null},
-    {'title': 'WORK SCHEDULE', 'value': null},
-    {'title': 'SALARY', 'value': null},
-    {'title': 'ACCOMMODATION', 'value': null},
-    {'title': 'EDUCATION LEVEL', 'value': null},
-    {'title': 'LANGUAGE REQUIREMENTS', 'value': null},
-    {'title': 'INTERNSHIP/APPRENTICESHIP', 'value': null},
-    {'title': 'INDUSTRY', 'value': null},
-    {'title': 'COMPANY SIZE', 'value': null},
-    {'title': 'COMPANY RATING', 'value': null},
-    {'title': 'REMOTE/IN-OFFICE', 'value': null},
-    {'title': 'DATE POSTED', 'value': null},
-    {'title': 'BENEFITS OFFERED', 'value': null},
+    {'title': 'JOB TITLE', 'isExpandable': true},
+    {'title': 'LOCATION', 'isExpandable': false},
+    {'title': 'EMPLOYMENT TYPE', 'isExpandable': false},
+    {'title': 'CONTRACT DURATION', 'isExpandable': false},
+    {'title': 'WORK SCHEDULE', 'isExpandable': false},
+    {'title': 'SALARY', 'isExpandable': false},
+    {'title': 'ACCOMMODATION', 'isExpandable': false},
+    {'title': 'EDUCATION LEVEL', 'isExpandable': false},
+    {'title': 'LANGUAGE REQUIREMENTS', 'isExpandable': false},
+    {'title': 'INTERNSHIP/APPRENTICESHIP', 'isExpandable': false},
+    {'title': 'INDUSTRY', 'isExpandable': false},
+    {'title': 'COMPANY SIZE', 'isExpandable': false},
+    {'title': 'COMPANY RATING', 'isExpandable': false},
+    {'title': 'REMOTE/IN-OFFICE', 'isExpandable': false},
+    {'title': 'DATE POSTED', 'isExpandable': false},
+    {'title': 'BENEFITS OFFERED', 'isExpandable': false},
   ];
 
   @override
@@ -202,6 +437,29 @@ class _SearchScreenState extends State<SearchScreen> {
               separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
               itemBuilder: (context, index) {
                 final filter = _filters[index];
+                
+                // Special case for JOB TITLE which uses the expandable filter
+                if (filter['title'] == 'JOB TITLE') {
+                  if (_isLoadingJobTitles) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator(color: Color(0xFF1156AC))),
+                    );
+                  }
+                  return ExpandableFilter(
+                    title: 'JOB TITLE',
+                    options: _jobTitles,
+                    selectedOptions: _selectedJobTitles,
+                    onSelectionChanged: (selected) {
+                      setState(() {
+                        _selectedJobTitles.clear();
+                        _selectedJobTitles.addAll(selected);
+                      });
+                    },
+                  );
+                }
+                
+                // Regular filter item for all others
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   title: Text(
@@ -215,7 +473,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xFF1156AC), size: 16),
                   onTap: () {
-                    // TODO: Handle filter selection
+                    // TODO: Handle other filter selections
                   },
                 );
               },

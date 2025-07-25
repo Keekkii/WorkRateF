@@ -59,6 +59,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/data/job_titles.txt
 
 
   # To add assets to your application, add an assets section, like this:
