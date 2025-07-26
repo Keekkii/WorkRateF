@@ -16,6 +16,8 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  String? _selectedLocation;
+  double _locationRadius = 10.0; // Default radius in km
   final LocationService _locationService = LocationService();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -26,7 +28,6 @@ class _SearchScreenState extends State<SearchScreen> {
   
   // Selected values
   String? _selectedCategory;
-  String? _selectedLocation;
   String? _selectedExperience;
   String? _selectedJobType;
   String? _selectedContractDuration;
@@ -132,8 +133,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => const ProfileScreen()),
                   );
-              },
-            ),
+                },
+              ),
             ],
           ),
         ),
@@ -190,6 +191,12 @@ class _SearchScreenState extends State<SearchScreen> {
               },
               isLocationFilter: true,
               locationService: _locationService,
+              locationRadius: _locationRadius,
+              onRadiusChanged: (radius) {
+                setState(() {
+                  _locationRadius = radius;
+                });
+              },
             ),
             
             const SizedBox(height: 8),
@@ -564,6 +571,8 @@ class ExpandableFilter extends StatefulWidget {
   final bool isJobTitleFilter;
   final bool isLocationFilter;
   final LocationService? locationService;
+  final double? locationRadius;
+  final ValueChanged<double>? onRadiusChanged;
   final Widget? customContent;
 
   const ExpandableFilter({
@@ -575,6 +584,8 @@ class ExpandableFilter extends StatefulWidget {
     this.isJobTitleFilter = false,
     this.isLocationFilter = false,
     this.locationService,
+    this.locationRadius,
+    this.onRadiusChanged,
     this.customContent,
   }) : super(key: key);
 
@@ -663,7 +674,99 @@ class _ExpandableFilterState extends State<ExpandableFilter> {
             });
           },
           children: [
-            if (widget.isJobTitleFilter || widget.isLocationFilter)
+            if (widget.isLocationFilter && widget.locationService != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  children: [
+                    TypeAheadField<String>(
+                      controller: _searchController,
+                      builder: (context, controller, focusNode) {
+                        return TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            hintText: 'Search for a city...',
+                            prefixIcon: const Icon(Icons.search, size: 20),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            ),
+                            isDense: true,
+                          ),
+                        );
+                      },
+                      suggestionsCallback: (pattern) async {
+                        if (pattern.length < 2) return [];
+                        return await widget.locationService!.searchCities(pattern);
+                      },
+                      itemBuilder: (context, suggestion) {
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          leading: const Icon(Icons.location_city, size: 20),
+                          title: Text(
+                            suggestion,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        );
+                      },
+                      onSelected: (suggestion) {
+                        _searchController.text = suggestion;
+                        widget.onSelectionChanged([suggestion]);
+                      },
+                      emptyBuilder: (context) => const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Text('No locations found', style: TextStyle(fontSize: 14)),
+                      ),
+                      hideOnLoading: true,
+                      hideOnEmpty: true,
+                      hideOnError: true,
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Search Radius: ${widget.locationRadius?.toInt() ?? 10} km',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Slider(
+                            value: widget.locationRadius ?? 10.0,
+                            min: 1.0,
+                            max: 100.0,
+                            divisions: 99,
+                            label: '${(widget.locationRadius ?? 10.0).toInt()} km',
+                            onChanged: (value) {
+                              if (widget.onRadiusChanged != null) {
+                                widget.onRadiusChanged!(value);
+                              }
+                            },
+                            activeColor: const Color(0xFF1156AC),
+                            inactiveColor: Colors.grey[300],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (widget.isJobTitleFilter)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: TextField(
