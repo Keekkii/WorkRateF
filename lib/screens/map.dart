@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:workrate/screens/profile.dart';
 import 'package:workrate/screens/search.dart';
 import 'package:workrate/screens/home_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -39,6 +40,18 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
+  // Coordinates for the center of Croatia
+  static const LatLng _defaultCroatiaLocation = LatLng(45.1, 15.2);
+
+  void _setDefaultLocation() {
+    setState(() {
+      _currentPosition = _defaultCroatiaLocation;
+      _currentAddress = ''; // Set empty string to hide the address text
+      _isLoading = false;
+      _errorMessage = null;
+    });
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
       setState(() {
@@ -49,11 +62,8 @@ class _MapScreenState extends State<MapScreen> {
       debugPrint('Checking location services...');
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        debugPrint('Location services are disabled');
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Location services are disabled.\nPlease enable them in your device settings.';
-        });
+        debugPrint('Location services are disabled, using default location');
+        _setDefaultLocation();
         return;
       }
 
@@ -63,21 +73,15 @@ class _MapScreenState extends State<MapScreen> {
         debugPrint('Requesting location permission...');
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          debugPrint('Location permissions were denied');
-          setState(() {
-            _isLoading = false;
-            _errorMessage = 'Location permission denied.\nPlease enable it in app settings.';
-          });
+          debugPrint('Location permissions were denied, using default location');
+          _setDefaultLocation();
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        debugPrint('Location permissions are permanently denied');
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Location permissions are permanently denied.\nPlease enable them in app settings.';
-        });
+        debugPrint('Location permissions are permanently denied, using default location');
+        _setDefaultLocation();
         return;
       }
 
@@ -143,28 +147,14 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'MAP',
-          style: TextStyle(
-            color: Color(0xFF1156AC),
-            fontWeight: FontWeight.bold,
-            fontFamily: 'RobotoMono',
-            letterSpacing: 2,
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1156AC)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
+      appBar: null, // Remove the app bar completely
+      body: Stack(
+        children: [
+          // The main content (map or loading/error)
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+                  ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -193,6 +183,69 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 )
               : _buildMapScreen(),
+          
+          // Floating search bar and menu button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10.0, // Below status bar
+            left: 20.0,
+            right: 20.0,
+            child: Row(
+              children: [
+                // Search Bar
+                Expanded(
+                  child: Container(
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1156AC).withOpacity(0.9), // Slightly transparent
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8.0,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      children: [
+                        SizedBox(width: 15.0),
+                        Icon(Icons.search, color: Colors.white, size: 20.0),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'JOB TITLE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10.0),
+                // Menu Button
+                Container(
+                  width: 40.0,
+                  height: 40.0,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1156AC).withOpacity(0.9), // Slightly transparent
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8.0,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.menu, color: Colors.white, size: 22.0),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       // Bottom Navigation Bar
       bottomNavigationBar: Container(
         color: const Color(0xFFEEEEEE),
@@ -247,68 +300,80 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildMapScreen() {
     return Stack(
       children: [
-        FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: _currentPosition ?? const LatLng(45.1, 15.2), // Default to Croatia center
-            initialZoom: _zoom,
-            onMapReady: () {
-              setState(() {
-                _isMapReady = true;
-              });
-              if (_currentPosition != null) {
-                _mapController.move(_currentPosition!, _zoom);
-              }
-            },
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.workrate',
+        // Wrap FlutterMap with RepaintBoundary to isolate it from the rest of the widget tree
+        RepaintBoundary(
+          child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _currentPosition ?? const LatLng(45.1, 15.2), // Default to Croatia center
+              initialZoom: _zoom,
+              maxZoom: 18.0, // Limit max zoom for performance
+              minZoom: 3.0,  // Limit min zoom for performance
+              onMapReady: () {
+                // Use postFrameCallback to avoid setState during build
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  setState(() {
+                    _isMapReady = true;
+                  });
+                  if (_currentPosition != null) {
+                    _mapController.move(_currentPosition!, _zoom);
+                  }
+                });
+              },
             ),
-            if (_currentPosition != null)
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: _currentPosition!,
-                    width: 40,
-                    height: 40,
-                    child: const Icon(
-                      Icons.location_pin,
-                      color: Color(0xFF1156AC),
-                      size: 40,
-                    ),
-                  ),
-                ],
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.workrate',
               ),
-          ],
-        ),
-        Positioned(
-          top: 20,
-          left: 20,
-          right: 20,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+              // Only rebuild marker layer when position changes
+              if (_currentPosition != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_pin,
+                        color: Color(0xFF1156AC),
+                        size: 40,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              _currentAddress,
-              style: const TextStyle(fontSize: 14),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
+            ],
           ),
         ),
+        // Only rebuild address container when address changes
+        if (_currentAddress.isNotEmpty)
+          Positioned(
+            top: 20,
+            left: 20,
+            right: 20,
+            child: AnimatedOpacity(
+              opacity: _isMapReady ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _currentAddress,
+                    style: const TextStyle(fontSize: 14),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
         Positioned(
           bottom: 100,
           right: 20,
