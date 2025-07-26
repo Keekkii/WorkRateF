@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'profile.dart';
 import 'search.dart';
+import 'map.dart';
 
 const Color primary = Color(0xFF1156AC);
 
@@ -199,10 +200,14 @@ class _BottomSvgButton extends StatelessWidget {
         } else if (label == "SEARCH") {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const SearchScreen(),),
+            MaterialPageRoute(builder: (context) => const SearchScreen()),
+          );
+        } else if (label == "MAP") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MapScreen()),
           );
         }
-        // TODO: Add navigation for other tabs
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
