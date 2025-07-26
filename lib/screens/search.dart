@@ -294,7 +294,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Accommodation
             ExpandableFilter(
               title: 'ACCOMMODATION:',
-              options: ['Provided', 'Not provided', 'Assistance available'],
+              options: ['Provided', 'Not provided'],
               selectedOptions: _selectedAccommodation != null ? [_selectedAccommodation!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -308,7 +308,15 @@ class _SearchScreenState extends State<SearchScreen> {
             // Education Level
             ExpandableFilter(
               title: 'EDUCATION LEVEL:',
-              options: ['High School', 'Associate Degree', "Bachelor's Degree", "Master's Degree", 'PhD', 'No Formal Education Required'],
+              options: [
+                'None',
+                'High school',
+                'Trade Certificate',
+                'Associate Degree',
+                "Bachelor's Degree",
+                "Master's Degree",
+                'Doctorate'
+              ],
               selectedOptions: _selectedEducationLevel != null ? [_selectedEducationLevel!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -322,7 +330,12 @@ class _SearchScreenState extends State<SearchScreen> {
             // Language Requirements
             ExpandableFilter(
               title: 'LANGUAGE REQUIREMENTS:',
-              options: ['English', 'German', 'Croatian', 'Italian', 'French', 'Spanish'],
+              options: [
+                'No Requirement',
+                'English',
+                'Local Language',
+                'Multilingual'
+              ],
               selectedOptions: _selectedLanguage != null ? [_selectedLanguage!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -336,7 +349,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Internship/Apprenticeship
             ExpandableFilter(
               title: 'INTERNSHIP/APPRENTICESHIP:',
-              options: ['Internship', 'Apprenticeship', 'Both', 'Not specified'],
+              options: ['Internship', 'Apprenticeship'],
               selectedOptions: _selectedInternshipType != null ? [_selectedInternshipType!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -350,7 +363,24 @@ class _SearchScreenState extends State<SearchScreen> {
             // Industry
             ExpandableFilter(
               title: 'INDUSTRY:',
-              options: ['IT', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing', 'Hospitality', 'Other'],
+              options: [
+                'Business & Management',
+                'Software & IT',
+                'Creative & Design',
+                'Skilled Trades & Labor',
+                'Education & Training',
+                'Sport & Fitness',
+                'Healthcare & Medical',
+                'Customer Service & Support',
+                'Finance & Accounting',
+                'Logistic & Warehouse',
+                'Marketing & Advertising',
+                'Retail & Sales',
+                'Hospitality & Food Service',
+                'Writing & Content',
+                'Internships & Entry-Level',
+                'Non-Profit & Volunteer'
+              ],
               selectedOptions: _selectedIndustry != null ? [_selectedIndustry!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -364,7 +394,12 @@ class _SearchScreenState extends State<SearchScreen> {
             // Company Size
             ExpandableFilter(
               title: 'COMPANY SIZE:',
-              options: ['1-10 employees', '11-50 employees', '51-200 employees', '201-1000 employees', '1000+ employees'],
+              options: [
+                'Solo/Freelancer',
+                'Small Business',
+                'Mid-Size Company',
+                'Large Company'
+              ],
               selectedOptions: _selectedCompanySize != null ? [_selectedCompanySize!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -378,7 +413,13 @@ class _SearchScreenState extends State<SearchScreen> {
             // Company Rating
             ExpandableFilter(
               title: 'COMPANY RATING:',
-              options: ['4.0+', '3.5+', '3.0+', '2.5+', '2.0+', 'No minimum rating'],
+              options: [
+                '5 stars',
+                '4 stars',
+                '3 stars',
+                '2 stars',
+                '1 star'
+              ],
               selectedOptions: _selectedCompanyRating != null ? [_selectedCompanyRating!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -392,7 +433,7 @@ class _SearchScreenState extends State<SearchScreen> {
             // Remote/In-Office
             ExpandableFilter(
               title: 'REMOTE/IN-OFFICE:',
-              options: ['Remote', 'On-site', 'Hybrid', 'Flexible'],
+              options: ['Remote', 'On-site', 'Hybrid'],
               selectedOptions: _selectedWorkLocation != null ? [_selectedWorkLocation!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -406,7 +447,13 @@ class _SearchScreenState extends State<SearchScreen> {
             // Date Posted
             ExpandableFilter(
               title: 'DATE POSTED:',
-              options: ['Last 24 hours', 'Last 3 days', 'Last week', 'Last 2 weeks', 'Last month', 'Any time'],
+              options: [
+                'Last Week',
+                'Last 2 Weeks',
+                'Last Month',
+                'Last 6 Months',
+                'Last Year'
+              ],
               selectedOptions: _selectedDatePosted != null ? [_selectedDatePosted!] : [],
               onSelectionChanged: (selected) {
                 setState(() {
@@ -420,7 +467,15 @@ class _SearchScreenState extends State<SearchScreen> {
             // Benefits Offered
             ExpandableFilter(
               title: 'BENEFITS OFFERED:',
-              options: ['Health insurance', 'Dental insurance', 'Paid time off', 'Retirement plan', 'Flexible schedule', 'Professional development', 'Gym membership', 'Free food'],
+              options: [
+                'Health Insurance',
+                'PTO',
+                'Career development',
+                'Parental leave',
+                'Teambuilding',
+                'Bonuses',
+                'Employee Discounts'
+              ],
               selectedOptions: _selectedBenefits,
               onSelectionChanged: (selected) {
                 setState(() {
