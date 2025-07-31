@@ -7,7 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'register_screen.dart';
 import 'complete_profile_screen.dart';
-import 'home_page.dart';
+import '../utils/navigation_utils.dart';
 
 const Color kBackground = Color(0xFF121515);
 const Color primary = Color(0xFF1156AC);
@@ -39,10 +39,12 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         if (doc.exists) {
-          // Redirect to HomePage
+          // Redirect to appropriate home page based on role
+          final homePage = await NavigationUtils.getHomePage();
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const HomePage()),
+            MaterialPageRoute(builder: (_) => homePage),
           );
         } else {
           // User registered with Auth but has no profile in Firestore (rare), show error
@@ -102,10 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
         final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
         if (doc.exists) {
-          // User already has profile, go to home
+          // User already has profile, go to appropriate home page
+          final homePage = await NavigationUtils.getHomePage();
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const HomePage()),
+            MaterialPageRoute(builder: (_) => homePage),
           );
         } else {
           // User needs to complete profile

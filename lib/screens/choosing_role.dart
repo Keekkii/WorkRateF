@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import '../utils/navigation_utils.dart';
+import 'package:flutter/material.dart';
 
 const Color kBackground = Color(0xFF18191A);
 const Color primary = Color(0xFF1156AC);
@@ -32,9 +33,12 @@ class _ChoosingRoleScreenState extends State<ChoosingRoleScreen> {
           .set({"role": _selectedRole}, SetOptions(merge: true));
 
       if (!mounted) return;
+      // Get the appropriate home page based on user role
+      final homePage = await NavigationUtils.getHomePage();
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => homePage),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
